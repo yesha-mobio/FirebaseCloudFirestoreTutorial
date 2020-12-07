@@ -6,27 +6,46 @@ import reportWebVitals from "./reportWebVitals";
 import { createStore, applyMiddleware, compose } from "redux";
 import { Provider } from "react-redux";
 import thunk from "redux-thunk";
-import { reduxFirestore, getFirestore } from "redux-firestore";
-import { reactReduxFirebase, getFirebase } from "react-redux-firebase";
+import {
+  createFirestoreInstance,
+  reduxFirestore,
+  getFirestore,
+} from "redux-firestore";
+import { ReactReduxFirebaseProvider, getFirebase } from "react-redux-firebase";
+import firebase from "firebase/app";
 
 import rootReducer from "./store/reducers/rootReducer";
 import fbConfig from "./config/fbConfig";
+
+const rrfConfig = {
+  userProfile: "users",
+  useFirestoreForProfile: true, // Firestore for Profile instead of Realtime DB
+  // attachAuthIsReady: true, // attaches auth is ready promise to store
+};
 
 const store = createStore(
   rootReducer,
   compose(
     applyMiddleware(thunk.withExtraArgument({ getFirebase, getFirestore })),
-    reduxFirestore(fbConfig),
-    reactReduxFirebase(fbConfig)
+    reduxFirestore(fbConfig)
   )
 );
 
+const rffProps = {
+  firebase,
+  config: rrfConfig,
+  dispatch: store.dispatch,
+  createFirestoreInstance,
+};
+
 ReactDOM.render(
-  <React.StrictMode>
-    <Provider store={store}>
+  // <React.StrictMode>
+  <Provider store={store}>
+    <ReactReduxFirebaseProvider {...rffProps}>
       <App />
-    </Provider>
-  </React.StrictMode>,
+    </ReactReduxFirebaseProvider>
+  </Provider>,
+  // </React.StrictMode>,
   document.getElementById("root")
 );
 

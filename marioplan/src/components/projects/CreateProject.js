@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { withFirebase } from "react-redux-firebase";
 
 import { createProject } from "../../store/actions/projectActions";
 
@@ -50,4 +51,4 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default connect(null, mapDispatchToProps)(CreateProject);
+export default connect(null, mapDispatchToProps)(withFirebase(CreateProject));

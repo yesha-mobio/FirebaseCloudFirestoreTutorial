@@ -16,11 +16,9 @@ class SignUp extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    console.log(this.state);
   };
 
   render() {
-    console.log(this.state);
     return (
       <div className="container">
         <form onSubmit={this.handleSubmit} className="white">
