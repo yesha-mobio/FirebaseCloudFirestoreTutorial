@@ -4,14 +4,18 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { createStore, applyMiddleware, compose } from "redux";
-import { Provider } from "react-redux";
+import { Provider, useSelector } from "react-redux";
 import thunk from "redux-thunk";
 import {
   createFirestoreInstance,
   reduxFirestore,
   getFirestore,
 } from "redux-firestore";
-import { ReactReduxFirebaseProvider, getFirebase } from "react-redux-firebase";
+import {
+  ReactReduxFirebaseProvider,
+  getFirebase,
+  isLoaded,
+} from "react-redux-firebase";
 import firebase from "firebase/app";
 
 import rootReducer from "./store/reducers/rootReducer";
@@ -20,14 +24,22 @@ import fbConfig from "./config/fbConfig";
 const rrfConfig = {
   userProfile: "users",
   useFirestoreForProfile: true, // Firestore for Profile instead of Realtime DB
-  // attachAuthIsReady: true, // attaches auth is ready promise to store
+  attachAuthIsReady: true, // attaches auth is ready promise to store
 };
+
+const enhancers = [];
+// const devToolsExtension = window.devToolsExtension;
+const devToolsExtension = window.__REDUX_DEVTOOLS_EXTENSION__;
+if (typeof devToolsExtension === "function") {
+  enhancers.push(devToolsExtension());
+}
 
 const store = createStore(
   rootReducer,
   compose(
     applyMiddleware(thunk.withExtraArgument({ getFirebase, getFirestore })),
-    reduxFirestore(fbConfig)
+    reduxFirestore(fbConfig),
+    ...enhancers
   )
 );
 
@@ -38,11 +50,24 @@ const rffProps = {
   createFirestoreInstance,
 };
 
+const AuthIsLoaded = ({ children }) => {
+  const auth = useSelector((state) => state.firebase.auth);
+  if (!isLoaded(auth))
+    return (
+      <div className="center red-text">
+        <h2>Loding...!!</h2>
+      </div>
+    );
+  return children;
+};
+
 ReactDOM.render(
   // <React.StrictMode>
   <Provider store={store}>
     <ReactReduxFirebaseProvider {...rffProps}>
-      <App />
+      <AuthIsLoaded>
+        <App />
+      </AuthIsLoaded>
     </ReactReduxFirebaseProvider>
   </Provider>,
   // </React.StrictMode>,
